@@ -32,6 +32,15 @@ view: orders {
     sql: ${TABLE}.user_id ;;
   }
 
+  measure: count_pending_orders  {
+    label: "Pending Orders"
+    type: count
+    filters: {
+      field: status
+      value: "pending"
+    }
+  }
+
   measure: count {
     type: count
     drill_fields: [id, users.id, users.first_name, users.last_name]

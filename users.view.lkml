@@ -74,7 +74,7 @@ view: users {
     sql: ${age} > 50 ;;
   }
 
-  dimension: Full_name {
+  dimension: full_name {
     type: string
     sql: concat(${first_name}," ", ${last_name}) ;;
   }
@@ -86,10 +86,19 @@ view: users {
     sql: ${age} ;;
     value_format_name: decimal_0
   }
-  dimension: Male {
+  dimension: male {
     type: yesno
     sql: ${gender} = "m" ;;
   }
+measure: count_in_california {
+  label: "Users in California"
+  description: "The count of all users in California"
+  type: count
+  filters: {
+    field: state
+    value: "California"
+  }
+}
 
 measure: count {
     type: count

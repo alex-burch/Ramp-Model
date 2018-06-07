@@ -13,43 +13,84 @@ datagroup: alex_burch_project_default_datagroup {
 
 persist_with: alex_burch_project_default_datagroup
 
+
+#
+# explore: order_items {
+#   join: users {
+#     type: left_outer
+#     sql_on: ${order_items.user_id} = ${users.id} ;;
+#     relationship: many_to_one
+#   }
+#
+#   join: inventory_items {
+#     type: left_outer
+#     sql_on: ${order_items.inventory_item_id} = ${inventory_items.id} ;;
+#     relationship: many_to_one
+#   }
+#
+#   join: products {
+#     type: left_outer
+#     sql_on: ${inventory_items.product_id} = ${products.id} ;;
+#     relationship: many_to_one
+#   }
+# }
+
+
 explore: order_items {
-   join: inventory_items {
-     type:left_outer
-     sql_on: ${order_items.inventory_item_id} = ${inventory_items.id} ;;
-     relationship: one_to_one
-   }
+  join: inventory_items {
+    type:left_outer
+    sql_on: ${order_items.inventory_item_id} = ${inventory_items.id} ;;
+    relationship: one_to_one
+  }
 
-   join: returned_products {
-     from: products
-     sql_on: ${inventory_items.product_id} = ${returned_products.id} AND ${order_items.returned_date} IS NOT NULL;;
-     relationship: many_to_one
-   }
+  join: returned_products {
+    from: products
+    sql_on: ${inventory_items.product_id} = ${returned_products.id} AND ${order_items.returned_date} IS NOT NULL;;
+    relationship: many_to_one
+  }
 
-   join: non_returned_products {
-     from: products
-     sql_on: ${inventory_items.product_id} = ${non_returned_products.id} AND ${order_items.returned_date} IS NULL;;
-     relationship: many_to_one
-   }
- }
+  join: non_returned_products {
+    from: products
+    sql_on: ${inventory_items.product_id} = ${non_returned_products.id} AND ${order_items.returned_date} IS NULL;;
+    relationship: many_to_one
+  }
+  join: orders {
+    type: left_outer
+    sql_on: ${order_items.order_id} = ${orders.id} ;;
+    relationship: many_to_one
+  }
+  join: users {
+    type: left_outer
+    sql_on: ${orders.user_id} = ${users.id} ;;
+    relationship: many_to_one
+  }
+}
 
- explore: users {
-   join: orders {
-     type: left_outer
-     sql_on: ${orders.user_id}=${users.id};;
-   relationship: one_to_many}
-     join: order_items {
-       type: left_outer
-       sql_on: ${orders.id}= ${order_items.order_id} ;;
-       relationship: one_to_many
-     }
-       join: inventory_items {
-         type: left_outer
-         sql_on: ${inventory_items.id} = ${order_items.inventory_item_id} ;;
-         relationship: one_to_one
-         fields: [inventory_items.cost, inventory_items.sold_date, inventory_items.id, inventory_items.Pricing_Tiers, inventory_items.count]
-       }
- }
+explore: users {
+  join: All_users {
+    from:  orders
+    type: left_outer
+    sql_on: ${All_users.id}=${users.id};;
+    relationship: one_to_many
+  }
+  join: users_who_ordered {
+    from: orders
+    type: inner
+    sql_on: ${users_who_ordered.id} = ${users.id} ;;
+    relationship: one_to_many
+  }
+  join: order_items {
+    type: left_outer
+    sql_on: ${All_users.id}= ${order_items.order_id} ;;
+    relationship: one_to_many
+  }
+  join: inventory_items {
+    type: left_outer
+    sql_on: ${inventory_items.id} = ${order_items.inventory_item_id} ;;
+    relationship: one_to_one
+    fields: [inventory_items.cost, inventory_items.sold_date, inventory_items.id, inventory_items.Pricing_Tiers, inventory_items.count]
+  }
+}
 
 #  explore: inventory_items {
 #    always_filter: {
@@ -60,51 +101,33 @@ explore: order_items {
 #    }
 # }
 
- explore: products {}
+explore: products {}
 
- explore: orders {}
+explore: orders {}
 
 explore: inventory_items {
-#   fields: [ALL_FIELDS*, -returned_items.Profit, -non_returned_items.Profit]
-#   from: inventory_items
+  fields: [ALL_FIELDS*, -returned_items.average_purchase_by_user, -non_returned_items.average_purchase_by_user]
+  view_label: "Warehousing"
   join: products {
+    view_label: "Product Information"
     type: left_outer
     sql_on: ${inventory_items.product_id} = ${products.id} ;;
     relationship: many_to_one
   }
-    join: returned_items {
+  join: returned_items {
     from: order_items
-      type: left_outer
-      sql_on: ${returned_items.inventory_item_id} = ${inventory_items.id} where ${returned_items.returned_date} is not null;;
-      relationship: one_to_one
-    }
-      join: non_returned_items {
-        from:  order_items
-        type: left_outer
-        sql_on: ${non_returned_items.inventory_item_id} = ${inventory_items.id} where ${non_returned_items.returned_date} is null ;;
-        relationship: one_to_one
-      }
+    type: left_outer
+    sql_on: ${returned_items.inventory_item_id} = ${inventory_items.id} where ${returned_items.returned_date} is not null;;
+    relationship: one_to_one
+  }
+  join: non_returned_items {
+    from:  order_items
+    type: left_outer
+    sql_on: ${non_returned_items.inventory_item_id} = ${inventory_items.id} where ${non_returned_items.returned_date} is null ;;
+    relationship: one_to_one
+  }
+
 }
-#
-# explore: order_items {
-#   join: inventory_items {
-#     type:left_outer
-#     sql_on: ${order_items.inventory_item_id} = ${inventory_items.id} ;;
-#     relationship: one_to_one
-#   }
-#
-#   join: returned_products {
-#     from: products
-#     sql_on: ${inventory_items.product_id} = ${returned_products.id} AND ${order_items.returned_date} IS NOT NULL;;
-#     relationship: many_to_one
-#   }
-#
-#   join: non_returned_products {
-#     from: products
-#     sql_on: ${inventory_items.product_id} = ${non_returned_products.id} AND ${order_items.returned_date} IS NULL;;
-#     relationship: many_to_one
-
-
 
 explore: return_analysis {
   from: order_items
@@ -114,21 +137,21 @@ explore: return_analysis {
     sql_on: ${return_analysis.order_id} = ${orders.id} ;;
     relationship: many_to_one
   }
-    join: users {
-      type: left_outer
-      sql_on: ${orders.user_id} = ${users.id} ;;
-      relationship: many_to_one
-    }
-      join: inventory_items {
-        type: left_outer
-        sql_on: ${return_analysis.inventory_item_id} = ${inventory_items.id} ;;
-        relationship: one_to_one
-    }
-        join: products {
-          type: left_outer
-          sql_on: ${inventory_items.product_id} = ${products.id} ;;
-          relationship: many_to_one
-        }
+  join: users {
+    type: left_outer
+    sql_on: ${orders.user_id} = ${users.id} ;;
+    relationship: many_to_one
+  }
+  join: inventory_items {
+    type: left_outer
+    sql_on: ${return_analysis.inventory_item_id} = ${inventory_items.id} ;;
+    relationship: many_to_one
+  }
+  join: products {
+    type: left_outer
+    sql_on: ${inventory_items.product_id} = ${products.id} ;;
+    relationship: many_to_one
+  }
 }
 
 #   joins:
