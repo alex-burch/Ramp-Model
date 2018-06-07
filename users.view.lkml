@@ -40,6 +40,7 @@ view: users {
   dimension: email {
     type: string
     sql: ${TABLE}.email ;;
+    hidden: yes
   }
 
   dimension: first_name {
