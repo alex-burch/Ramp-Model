@@ -130,6 +130,12 @@ explore: inventory_items {
 }
 
 explore: return_analysis {
+
+  access_filter: {
+    field: products.brand
+    user_attribute: brand_name
+  }
+
   from: order_items
   sql_always_where: ${returned_date} is not null  ;;
   join:  orders{
